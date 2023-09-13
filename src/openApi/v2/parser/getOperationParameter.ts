@@ -24,7 +24,7 @@ export const getOperationParameter = (openApi: OpenApi, parameter: OpenApiParame
         description: parameter.description || null,
         isDefinition: false,
         isReadOnly: false,
-        isRequired: parameter.required === true,
+        isRequired: parameter.in === 'header' ? false : parameter.required === true, // Headers are always optional
         isNullable: parameter['x-nullable'] === true,
         format: parameter.format,
         maximum: parameter.maximum,
