@@ -100,7 +100,7 @@ export const request = <T>(config: OpenAPIConfig, http: HttpClient, options: Api
 			} as ApiResult);
 		}),
 		map(result => {
-			catchErrorCodes(options, result);
+			catchErrorCodes(config, options, result);
 			return result.body as T;
 		}),
 		catchError((error: ApiError) => {

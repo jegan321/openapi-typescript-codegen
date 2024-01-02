@@ -1,6 +1,6 @@
 
 
-export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): void => {
+export const catchErrorCodes = (config: OpenAPIConfig, options: ApiRequestOptions, result: ApiResult): void => {
 	const errors: Record<number, string> = {
 		400: 'Bad Request',
 		401: 'Unauthorized',
@@ -14,7 +14,12 @@ export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): 
 
 	const error = errors[result.status];
 	if (error) {
-		throw new ApiError(options, result, error);
+		const apiError = new ApiError(options, result, error);
+		const errorCallback = config.ERROR_CALLBACK;
+		if (errorCallback) {
+			errorCallback(apiError);
+		}
+		throw apiError;
 	}
 
 	if (!result.ok) {

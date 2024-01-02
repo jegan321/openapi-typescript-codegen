@@ -206,6 +206,7 @@ exports[`v2 should generate: test/generated/v2/core/OpenAPI.ts 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 import type { ApiRequestOptions } from './ApiRequestOptions';
+import { ApiError } from './ApiError';
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
@@ -220,6 +221,7 @@ export type OpenAPIConfig = {
     PASSWORD?: string | Resolver<string> | undefined;
     HEADERS?: Headers | Resolver<Headers> | undefined;
     ENCODE_PATH?: ((path: string) => string) | undefined;
+    ERROR_CALLBACK?: (error: ApiError) => void;
 };
 
 export const OpenAPI: OpenAPIConfig = {
@@ -500,6 +502,10 @@ export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): 
 
     const error = errors[result.status];
     if (error) {
+        const errorCallback = OpenAPI.ERROR_CALLBACK;
+        if (errorCallback) {
+            errorCallback(new ApiError(options, result, error));
+        }
         throw new ApiError(options, result, error);
     }
 
@@ -2821,19 +2827,19 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class ParametersService {
     /**
-     * @param parameterHeader This is the parameter that goes into the header
      * @param parameterQuery This is the parameter that goes into the query params
      * @param parameterForm This is the parameter that goes into the form data
      * @param parameterBody This is the parameter that is sent as request body
      * @param parameterPath This is the parameter that goes into the path
+     * @param parameterHeader This is the parameter that goes into the header
      * @throws ApiError
      */
     public static callWithParameters(
-        parameterHeader: string,
         parameterQuery: string,
         parameterForm: string,
         parameterBody: string,
         parameterPath: string,
+        parameterHeader?: string,
     ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -2854,7 +2860,6 @@ export class ParametersService {
         });
     }
     /**
-     * @param parameterHeader This is the parameter that goes into the request header
      * @param parameterQuery This is the parameter that goes into the request query params
      * @param parameterForm This is the parameter that goes into the request form data
      * @param parameterBody This is the parameter that is sent as request body
@@ -2862,10 +2867,10 @@ export class ParametersService {
      * @param parameterPath2 This is the parameter that goes into the path
      * @param parameterPath3 This is the parameter that goes into the path
      * @param _default This is the parameter with a reserved keyword
+     * @param parameterHeader This is the parameter that goes into the request header
      * @throws ApiError
      */
     public static callWithWeirdParameterNames(
-        parameterHeader: string,
         parameterQuery: string,
         parameterForm: string,
         parameterBody: string,
@@ -2873,6 +2878,7 @@ export class ParametersService {
         parameterPath2?: string,
         parameterPath3?: string,
         _default?: string,
+        parameterHeader?: string,
     ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -3299,6 +3305,7 @@ exports[`v3 should generate: test/generated/v3/core/OpenAPI.ts 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 import type { ApiRequestOptions } from './ApiRequestOptions';
+import { ApiError } from './ApiError';
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
@@ -3313,6 +3320,7 @@ export type OpenAPIConfig = {
     PASSWORD?: string | Resolver<string> | undefined;
     HEADERS?: Headers | Resolver<Headers> | undefined;
     ENCODE_PATH?: ((path: string) => string) | undefined;
+    ERROR_CALLBACK?: (error: ApiError) => void;
 };
 
 export const OpenAPI: OpenAPIConfig = {
@@ -3593,6 +3601,10 @@ export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): 
 
     const error = errors[result.status];
     if (error) {
+        const errorCallback = OpenAPI.ERROR_CALLBACK;
+        if (errorCallback) {
+            errorCallback(new ApiError(options, result, error));
+        }
         throw new ApiError(options, result, error);
     }
 
@@ -6621,7 +6633,7 @@ export class DeprecatedService {
      * @throws ApiError
      */
     public static deprecatedCall(
-        parameter: DeprecatedModel | null,
+        parameter?: DeprecatedModel | null,
     ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -6997,21 +7009,21 @@ import { OpenAPI } from '../core/OpenAPI';
 import { request as __request } from '../core/request';
 export class ParametersService {
     /**
-     * @param parameterHeader This is the parameter that goes into the header
      * @param parameterQuery This is the parameter that goes into the query params
      * @param parameterForm This is the parameter that goes into the form data
      * @param parameterCookie This is the parameter that goes into the cookie
      * @param parameterPath This is the parameter that goes into the path
      * @param requestBody This is the parameter that goes into the body
+     * @param parameterHeader This is the parameter that goes into the header
      * @throws ApiError
      */
     public static callWithParameters(
-        parameterHeader: string | null,
         parameterQuery: string | null,
         parameterForm: string | null,
         parameterCookie: string | null,
         parameterPath: string | null,
         requestBody: ModelWithString | null,
+        parameterHeader?: string | null,
     ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'POST',
@@ -7036,7 +7048,6 @@ export class ParametersService {
         });
     }
     /**
-     * @param parameterHeader This is the parameter that goes into the request header
      * @param parameterQuery This is the parameter that goes into the request query params
      * @param parameterForm This is the parameter that goes into the request form data
      * @param parameterCookie This is the parameter that goes into the cookie
@@ -7045,10 +7056,10 @@ export class ParametersService {
      * @param parameterPath2 This is the parameter that goes into the path
      * @param parameterPath3 This is the parameter that goes into the path
      * @param _default This is the parameter with a reserved keyword
+     * @param parameterHeader This is the parameter that goes into the request header
      * @throws ApiError
      */
     public static callWithWeirdParameterNames(
-        parameterHeader: string | null,
         parameterQuery: string | null,
         parameterForm: string | null,
         parameterCookie: string | null,
@@ -7057,6 +7068,7 @@ export class ParametersService {
         parameterPath2?: string,
         parameterPath3?: string,
         _default?: string,
+        parameterHeader?: string | null,
     ): CancelablePromise<void> {
         return __request(OpenAPI, {
             method: 'POST',
