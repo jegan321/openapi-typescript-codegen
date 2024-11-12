@@ -488,7 +488,7 @@ export const getResponseBody = async (response: Response): Promise<any> => {
     return undefined;
 };
 
-export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): void => {
+export const catchErrorCodes = (config: OpenAPIConfig, options: ApiRequestOptions, result: ApiResult): void => {
     const errors: Record<number, string> = {
         400: 'Bad Request',
         401: 'Unauthorized',
@@ -502,11 +502,12 @@ export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): 
 
     const error = errors[result.status];
     if (error) {
-        const errorCallback = OpenAPI.ERROR_CALLBACK;
+        const apiError = new ApiError(options, result, error);
+        const errorCallback = config.ERROR_CALLBACK;
         if (errorCallback) {
-            errorCallback(new ApiError(options, result, error));
+            errorCallback(apiError);
         }
-        throw new ApiError(options, result, error);
+        throw apiError;
     }
 
     if (!result.ok) {
@@ -554,7 +555,7 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
                     body: responseHeader ?? responseBody,
                 };
 
-                catchErrorCodes(options, result);
+                catchErrorCodes(config, options, result);
 
                 resolve(result.body);
             }
@@ -3587,7 +3588,7 @@ export const getResponseBody = async (response: Response): Promise<any> => {
     return undefined;
 };
 
-export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): void => {
+export const catchErrorCodes = (config: OpenAPIConfig, options: ApiRequestOptions, result: ApiResult): void => {
     const errors: Record<number, string> = {
         400: 'Bad Request',
         401: 'Unauthorized',
@@ -3601,11 +3602,12 @@ export const catchErrorCodes = (options: ApiRequestOptions, result: ApiResult): 
 
     const error = errors[result.status];
     if (error) {
-        const errorCallback = OpenAPI.ERROR_CALLBACK;
+        const apiError = new ApiError(options, result, error);
+        const errorCallback = config.ERROR_CALLBACK;
         if (errorCallback) {
-            errorCallback(new ApiError(options, result, error));
+            errorCallback(apiError);
         }
-        throw new ApiError(options, result, error);
+        throw apiError;
     }
 
     if (!result.ok) {
@@ -3653,7 +3655,7 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
                     body: responseHeader ?? responseBody,
                 };
 
-                catchErrorCodes(options, result);
+                catchErrorCodes(config, options, result);
 
                 resolve(result.body);
             }

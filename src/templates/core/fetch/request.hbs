@@ -65,6 +65,9 @@ import type { OpenAPIConfig } from './OpenAPI';
 export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): CancelablePromise<T> => {
 	return new CancelablePromise(async (resolve, reject, onCancel) => {
 		try {
+			if (config.BEFORE_REQUEST) {
+				config.BEFORE_REQUEST(options);
+			}
 			const url = getUrl(config, options);
 			const formData = getFormData(options);
 			const body = getRequestBody(options);
@@ -82,6 +85,10 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
 					statusText: response.statusText,
 					body: responseHeader ?? responseBody,
 				};
+
+				if (config.AFTER_REQUEST) {
+					config.AFTER_REQUEST(result);
+				}
 
 				catchErrorCodes(config, options, result);
 

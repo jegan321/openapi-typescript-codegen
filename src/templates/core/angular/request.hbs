@@ -72,6 +72,10 @@ export const request = <T>(config: OpenAPIConfig, http: HttpClient, options: Api
 	const formData = getFormData(options);
 	const body = getRequestBody(options);
 
+	if (config.BEFORE_REQUEST) {
+		config.BEFORE_REQUEST(options);
+	}
+
 	return getHeaders(config, options).pipe(
 		switchMap(headers => {
 			return sendRequest<T>(config, options, http, url, formData, body, headers);
@@ -79,13 +83,17 @@ export const request = <T>(config: OpenAPIConfig, http: HttpClient, options: Api
 		map(response => {
 			const responseBody = getResponseBody(response);
 			const responseHeader = getResponseHeader(response, options.responseHeader);
-			return {
+			const result = {
 				url,
 				ok: response.ok,
 				status: response.status,
 				statusText: response.statusText,
 				body: responseHeader ?? responseBody,
 			} as ApiResult;
+			if (config.AFTER_REQUEST) {
+				config.AFTER_REQUEST(result);
+			}
+			return result;
 		}),
 		catchError((error: HttpErrorResponse) => {
 			if (!error.status) {
