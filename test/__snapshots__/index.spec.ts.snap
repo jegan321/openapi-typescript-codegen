@@ -207,6 +207,7 @@ exports[`v2 should generate: test/generated/v2/core/OpenAPI.ts 1`] = `
 /* eslint-disable */
 import type { ApiRequestOptions } from './ApiRequestOptions';
 import { ApiError } from './ApiError';
+import { ApiResult } from './ApiResult';
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
@@ -222,6 +223,8 @@ export type OpenAPIConfig = {
     HEADERS?: Headers | Resolver<Headers> | undefined;
     ENCODE_PATH?: ((path: string) => string) | undefined;
     ERROR_CALLBACK?: (error: ApiError) => void;
+    BEFORE_REQUEST?: (options: ApiRequestOptions) => void;
+    AFTER_REQUEST?: (apiResult: ApiResult) => void;
 };
 
 export const OpenAPI: OpenAPIConfig = {
@@ -537,6 +540,9 @@ export const catchErrorCodes = (config: OpenAPIConfig, options: ApiRequestOption
 export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): CancelablePromise<T> => {
     return new CancelablePromise(async (resolve, reject, onCancel) => {
         try {
+            if (config.BEFORE_REQUEST) {
+                config.BEFORE_REQUEST(options);
+            }
             const url = getUrl(config, options);
             const formData = getFormData(options);
             const body = getRequestBody(options);
@@ -554,6 +560,10 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
                     statusText: response.statusText,
                     body: responseHeader ?? responseBody,
                 };
+
+                if (config.AFTER_REQUEST) {
+                    config.AFTER_REQUEST(result);
+                }
 
                 catchErrorCodes(config, options, result);
 
@@ -3307,6 +3317,7 @@ exports[`v3 should generate: test/generated/v3/core/OpenAPI.ts 1`] = `
 /* eslint-disable */
 import type { ApiRequestOptions } from './ApiRequestOptions';
 import { ApiError } from './ApiError';
+import { ApiResult } from './ApiResult';
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
@@ -3322,6 +3333,8 @@ export type OpenAPIConfig = {
     HEADERS?: Headers | Resolver<Headers> | undefined;
     ENCODE_PATH?: ((path: string) => string) | undefined;
     ERROR_CALLBACK?: (error: ApiError) => void;
+    BEFORE_REQUEST?: (options: ApiRequestOptions) => void;
+    AFTER_REQUEST?: (apiResult: ApiResult) => void;
 };
 
 export const OpenAPI: OpenAPIConfig = {
@@ -3637,6 +3650,9 @@ export const catchErrorCodes = (config: OpenAPIConfig, options: ApiRequestOption
 export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): CancelablePromise<T> => {
     return new CancelablePromise(async (resolve, reject, onCancel) => {
         try {
+            if (config.BEFORE_REQUEST) {
+                config.BEFORE_REQUEST(options);
+            }
             const url = getUrl(config, options);
             const formData = getFormData(options);
             const body = getRequestBody(options);
@@ -3654,6 +3670,10 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
                     statusText: response.statusText,
                     body: responseHeader ?? responseBody,
                 };
+
+                if (config.AFTER_REQUEST) {
+                    config.AFTER_REQUEST(result);
+                }
 
                 catchErrorCodes(config, options, result);
 

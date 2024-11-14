@@ -1,8 +1,8 @@
 {{>header}}
 
 import type { ApiRequestOptions } from './ApiRequestOptions';
+import type { ApiResult } from './ApiResult';
 import { ApiError } from './ApiError';
-import { ApiResult } from './ApiResult';
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;

@@ -1,6 +1,6 @@
 {
     "name": "@jegan321/openapi-typescript-codegen",
-    "version": "0.25.2",
+    "version": "0.25.3",
     "description": "Library that generates Typescript clients based on the OpenAPI specification. Fork of ferdikoomen/openapi-typescript-codegen",
     "author": "John Egan",
     "homepage": "https://github.com/jegan321/openapi-typescript-codegen",
