@@ -206,8 +206,8 @@ exports[`v2 should generate: test/generated/v2/core/OpenAPI.ts 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 import type { ApiRequestOptions } from './ApiRequestOptions';
+import type { ApiResult } from './ApiResult';
 import { ApiError } from './ApiError';
-import { ApiResult } from './ApiResult';
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
@@ -3316,8 +3316,8 @@ exports[`v3 should generate: test/generated/v3/core/OpenAPI.ts 1`] = `
 /* tslint:disable */
 /* eslint-disable */
 import type { ApiRequestOptions } from './ApiRequestOptions';
+import type { ApiResult } from './ApiResult';
 import { ApiError } from './ApiError';
-import { ApiResult } from './ApiResult';
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
