@@ -5,7 +5,8 @@ Fork of [ferdikoomen/openapi-typescript-codegen](https://github.com/ferdikoomen/
 ## List of changes
 1. Headers are always optional, whether the OpenAPI JSON says they are required or not.
 2. Added an optional config property called `ERROR_CALLBACK` which is a function that will run before API errors are thrown.
-3. Ability to run code before or after each request using `BEFORE_REQUEST` and `BEFORE_REQUEST` config
+3. Ability to run code before or after each request using `BEFORE_REQUEST` and `BEFORE_REQUEST` config.
+4. Added `--modelsImportPath` to configure service model imports. Combine with `--exportModels false` to share models across clients.
 
 ## Testing
 1. Run `npm test` to run automated tests

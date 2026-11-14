@@ -22,6 +22,7 @@ export type Options = {
     exportCore?: boolean;
     exportServices?: boolean;
     exportModels?: boolean;
+    modelsImportPath?: string;
     exportSchemas?: boolean;
     indent?: Indent;
     postfixServices?: string;
@@ -42,6 +43,7 @@ export type Options = {
  * @param useUnionTypes Use union types instead of enums
  * @param exportCore Generate core client classes
  * @param exportServices Generate services
+ * @param modelsImportPath Model import path relative to generated services
  * @param exportModels Generate models
  * @param exportSchemas Generate schemas
  * @param indent Indentation options (4, 2 or tab)
@@ -60,6 +62,7 @@ export const generate = async ({
     exportCore = true,
     exportServices = true,
     exportModels = true,
+    modelsImportPath = '../models',
     exportSchemas = false,
     indent = Indent.SPACE_4,
     postfixServices = 'Service',
@@ -95,7 +98,8 @@ export const generate = async ({
                 postfixServices,
                 postfixModels,
                 clientName,
-                request
+                request,
+                modelsImportPath
             );
             break;
         }
@@ -119,7 +123,8 @@ export const generate = async ({
                 postfixServices,
                 postfixModels,
                 clientName,
-                request
+                request,
+                modelsImportPath
             );
             break;
         }

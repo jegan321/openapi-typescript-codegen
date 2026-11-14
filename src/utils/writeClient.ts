@@ -32,6 +32,7 @@ import { writeClientServices } from './writeClientServices';
  * @param postfixModels Model name postfix
  * @param clientName Custom client class name
  * @param request Path to custom request file
+ * @param modelsImportPath Model import path relative to generated services
  */
 export const writeClient = async (
     client: Client,
@@ -48,7 +49,8 @@ export const writeClient = async (
     postfixServices: string,
     postfixModels: string,
     clientName?: string,
-    request?: string
+    request?: string,
+    modelsImportPath: string = '../models'
 ): Promise<void> => {
     const outputPath = resolve(process.cwd(), output);
     const outputPathCore = resolve(outputPath, 'core');
@@ -78,7 +80,8 @@ export const writeClient = async (
             useOptions,
             indent,
             postfixServices,
-            clientName
+            clientName,
+            modelsImportPath
         );
     }
 

@@ -1,4 +1,6 @@
 const crossSpawn = require('cross-spawn');
+const fs = require('fs');
+const path = require('path');
 
 describe('bin', () => {
     it('it should support minimal params', async () => {
@@ -41,6 +43,47 @@ describe('bin', () => {
         ]);
         expect(result.stdout.toString()).toBe('');
         expect(result.stderr.toString()).toBe('');
+    });
+
+    it('shares one models directory between fetch and Angular clients', () => {
+        fs.mkdirSync('./test/generated', { recursive: true });
+        const output = fs.mkdtempSync('./test/generated/shared-models-');
+        const generate = args => {
+            const result = crossSpawn.sync('node', ['./bin/index.js', '--input', './test/spec/v3.json', ...args]);
+            expect(result.stderr.toString()).toBe('');
+            expect(result.status).toBe(0);
+        };
+        try {
+            generate(['--output', output, '--exportCore', 'false', '--exportServices', 'false']);
+            for (const client of ['fetch', 'angular']) {
+                const target = path.join(output, client);
+                generate([
+                    '--output',
+                    target,
+                    '--client',
+                    client,
+                    '--exportModels',
+                    'false',
+                    '--modelsImportPath',
+                    '../../models/',
+                ]);
+                expect(fs.existsSync(path.join(target, 'models'))).toBe(false);
+                const services = path.join(target, 'services');
+                let imports = 0;
+                for (const file of fs.readdirSync(services)) {
+                    const source = fs.readFileSync(path.join(services, file), 'utf8');
+                    expect(source).not.toContain("from '../models/");
+                    for (const match of source.matchAll(/from '(\.\.\/\.\.\/models\/[^']+)'/g)) {
+                        expect(fs.existsSync(path.resolve(services, `${match[1]}.ts`))).toBe(true);
+                        imports++;
+                    }
+                }
+                expect(imports).toBeGreaterThan(0);
+                expect(fs.readFileSync(path.join(target, 'index.ts'), 'utf8')).not.toContain("from './models/");
+            }
+        } finally {
+            fs.rmSync(output, { recursive: true, force: true });
+        }
     });
 
     it('it should throw error without params', async () => {

@@ -20,6 +20,7 @@ import type { Templates } from './registerHandlebarTemplates';
  * @param indent Indentation options (4, 2 or tab)
  * @param postfix Service name postfix
  * @param clientName Custom client class name
+ * @param modelsImportPath Model import path relative to generated services
  */
 export const writeClientServices = async (
     services: Service[],
@@ -30,7 +31,8 @@ export const writeClientServices = async (
     useOptions: boolean,
     indent: Indent,
     postfix: string,
-    clientName?: string
+    clientName?: string,
+    modelsImportPath: string = '../models'
 ): Promise<void> => {
     for (const service of services) {
         const file = resolve(outputPath, `${service.name}${postfix}.ts`);
@@ -40,6 +42,7 @@ export const writeClientServices = async (
             useUnionTypes,
             useOptions,
             postfix,
+            modelsImportPath: modelsImportPath.replace(/\/+$/, ''),
             exportClient: isDefined(clientName),
         });
         await writeFile(file, i(f(templateResult), indent));
