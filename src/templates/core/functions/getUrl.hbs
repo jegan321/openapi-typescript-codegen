@@ -12,7 +12,11 @@ const getUrl = (config: OpenAPIConfig, options: ApiRequestOptions): string => {
 
 	const url = `${config.BASE}${path}`;
 	if (options.query) {
+{{#equals @root.httpClient 'fetch'}}
+		return `${url}${(config.QUERY_SERIALIZER ?? getQueryString)(options.query)}`;
+{{else}}
 		return `${url}${getQueryString(options.query)}`;
+{{/equals}}
 	}
 	return url;
 };

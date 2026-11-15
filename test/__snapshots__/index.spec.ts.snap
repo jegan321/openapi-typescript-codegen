@@ -208,6 +208,7 @@ exports[`v2 should generate: test/generated/v2/core/OpenAPI.ts 1`] = `
 import type { ApiRequestOptions } from './ApiRequestOptions';
 import type { ApiResult } from './ApiResult';
 import { ApiError } from './ApiError';
+import type { CancelablePromise } from './CancelablePromise';
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
@@ -224,6 +225,11 @@ export type OpenAPIConfig = {
     ENCODE_PATH?: ((path: string) => string) | undefined;
     ERROR_CALLBACK?: (error: ApiError) => void;
     BEFORE_REQUEST?: (options: ApiRequestOptions) => void | Promise<void>;
+    ON_REQUEST?: (request: CancelablePromise<any>, options: ApiRequestOptions) => void | (() => void);
+    ON_RESPONSE?: (response: Response, options: ApiRequestOptions) => void;
+    ON_TRANSPORT_ERROR?: (error: unknown, options: ApiRequestOptions) => void;
+    TRANSFORM_TRANSPORT_ERROR?: (error: unknown, options: ApiRequestOptions) => unknown;
+    QUERY_SERIALIZER?: (query: Record<string, any>) => string;
     AFTER_REQUEST?: (apiResult: ApiResult) => void;
 };
 
@@ -339,7 +345,7 @@ const getUrl = (config: OpenAPIConfig, options: ApiRequestOptions): string => {
 
     const url = \`\${config.BASE}\${path}\`;
     if (options.query) {
-        return \`\${url}\${getQueryString(options.query)}\`;
+        return \`\${url}\${(config.QUERY_SERIALIZER ?? getQueryString)(options.query)}\`;
     }
     return url;
 };
@@ -458,7 +464,17 @@ export const sendRequest = async (
 
     onCancel(() => controller.abort());
 
-    return await fetch(url, request);
+    try {
+        return await fetch(url, request);
+    } catch (error) {
+        if (!onCancel.isCancelled) {
+            config.ON_TRANSPORT_ERROR?.(error, options);
+            if (config.TRANSFORM_TRANSPORT_ERROR) {
+                throw config.TRANSFORM_TRANSPORT_ERROR(error, options);
+            }
+        }
+        throw error;
+    }
 };
 
 export const getResponseHeader = (response: Response, responseHeader?: string): string | undefined => {
@@ -538,7 +554,7 @@ export const catchErrorCodes = (config: OpenAPIConfig, options: ApiRequestOption
  * @throws ApiError
  */
 export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): CancelablePromise<T> => {
-    return new CancelablePromise(async (resolve, reject, onCancel) => {
+    const promise = new CancelablePromise<T>(async (resolve, reject, onCancel) => {
         try {
             if (config.BEFORE_REQUEST) {
                 await config.BEFORE_REQUEST(options);
@@ -550,6 +566,7 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
 
             if (!onCancel.isCancelled) {
                 const response = await sendRequest(config, options, url, body, formData, headers, onCancel);
+                config.ON_RESPONSE?.(response, options);
                 const responseBody = await getResponseBody(response);
                 const responseHeader = getResponseHeader(response, options.responseHeader);
 
@@ -573,6 +590,18 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
             reject(error);
         }
     });
+    if (config.ON_REQUEST) {
+        // Both branches fulfill, so rejected/cancelled requests cannot create an
+        // unhandled cleanup promise. Lifecycle observers never alter the request.
+        try {
+            const cleanup = config.ON_REQUEST(promise, options);
+            if (cleanup) {
+                const settle = () => { try { cleanup(); } catch { /* Observer only */ } };
+                void promise.then(settle, settle);
+            }
+        } catch { /* Observer only */ }
+    }
+    return promise;
 };
 "
 `;
@@ -3318,6 +3347,7 @@ exports[`v3 should generate: test/generated/v3/core/OpenAPI.ts 1`] = `
 import type { ApiRequestOptions } from './ApiRequestOptions';
 import type { ApiResult } from './ApiResult';
 import { ApiError } from './ApiError';
+import type { CancelablePromise } from './CancelablePromise';
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
@@ -3334,6 +3364,11 @@ export type OpenAPIConfig = {
     ENCODE_PATH?: ((path: string) => string) | undefined;
     ERROR_CALLBACK?: (error: ApiError) => void;
     BEFORE_REQUEST?: (options: ApiRequestOptions) => void | Promise<void>;
+    ON_REQUEST?: (request: CancelablePromise<any>, options: ApiRequestOptions) => void | (() => void);
+    ON_RESPONSE?: (response: Response, options: ApiRequestOptions) => void;
+    ON_TRANSPORT_ERROR?: (error: unknown, options: ApiRequestOptions) => void;
+    TRANSFORM_TRANSPORT_ERROR?: (error: unknown, options: ApiRequestOptions) => unknown;
+    QUERY_SERIALIZER?: (query: Record<string, any>) => string;
     AFTER_REQUEST?: (apiResult: ApiResult) => void;
 };
 
@@ -3449,7 +3484,7 @@ const getUrl = (config: OpenAPIConfig, options: ApiRequestOptions): string => {
 
     const url = \`\${config.BASE}\${path}\`;
     if (options.query) {
-        return \`\${url}\${getQueryString(options.query)}\`;
+        return \`\${url}\${(config.QUERY_SERIALIZER ?? getQueryString)(options.query)}\`;
     }
     return url;
 };
@@ -3568,7 +3603,17 @@ export const sendRequest = async (
 
     onCancel(() => controller.abort());
 
-    return await fetch(url, request);
+    try {
+        return await fetch(url, request);
+    } catch (error) {
+        if (!onCancel.isCancelled) {
+            config.ON_TRANSPORT_ERROR?.(error, options);
+            if (config.TRANSFORM_TRANSPORT_ERROR) {
+                throw config.TRANSFORM_TRANSPORT_ERROR(error, options);
+            }
+        }
+        throw error;
+    }
 };
 
 export const getResponseHeader = (response: Response, responseHeader?: string): string | undefined => {
@@ -3648,7 +3693,7 @@ export const catchErrorCodes = (config: OpenAPIConfig, options: ApiRequestOption
  * @throws ApiError
  */
 export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): CancelablePromise<T> => {
-    return new CancelablePromise(async (resolve, reject, onCancel) => {
+    const promise = new CancelablePromise<T>(async (resolve, reject, onCancel) => {
         try {
             if (config.BEFORE_REQUEST) {
                 await config.BEFORE_REQUEST(options);
@@ -3660,6 +3705,7 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
 
             if (!onCancel.isCancelled) {
                 const response = await sendRequest(config, options, url, body, formData, headers, onCancel);
+                config.ON_RESPONSE?.(response, options);
                 const responseBody = await getResponseBody(response);
                 const responseHeader = getResponseHeader(response, options.responseHeader);
 
@@ -3683,6 +3729,18 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
             reject(error);
         }
     });
+    if (config.ON_REQUEST) {
+        // Both branches fulfill, so rejected/cancelled requests cannot create an
+        // unhandled cleanup promise. Lifecycle observers never alter the request.
+        try {
+            const cleanup = config.ON_REQUEST(promise, options);
+            if (cleanup) {
+                const settle = () => { try { cleanup(); } catch { /* Observer only */ } };
+                void promise.then(settle, settle);
+            }
+        } catch { /* Observer only */ }
+    }
+    return promise;
 };
 "
 `;

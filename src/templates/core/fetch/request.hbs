@@ -63,7 +63,7 @@ import type { OpenAPIConfig } from './OpenAPI';
  * @throws ApiError
  */
 export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): CancelablePromise<T> => {
-	return new CancelablePromise(async (resolve, reject, onCancel) => {
+	const promise = new CancelablePromise<T>(async (resolve, reject, onCancel) => {
 		try {
 			if (config.BEFORE_REQUEST) {
 				await config.BEFORE_REQUEST(options);
@@ -75,6 +75,7 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
 
 			if (!onCancel.isCancelled) {
 				const response = await sendRequest(config, options, url, body, formData, headers, onCancel);
+				config.ON_RESPONSE?.(response, options);
 				const responseBody = await getResponseBody(response);
 				const responseHeader = getResponseHeader(response, options.responseHeader);
 
@@ -98,4 +99,16 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
 			reject(error);
 		}
 	});
+	if (config.ON_REQUEST) {
+		// Both branches fulfill, so rejected/cancelled requests cannot create an
+		// unhandled cleanup promise. Lifecycle observers never alter the request.
+		try {
+			const cleanup = config.ON_REQUEST(promise, options);
+			if (cleanup) {
+				const settle = () => { try { cleanup(); } catch { /* Observer only */ } };
+				void promise.then(settle, settle);
+			}
+		} catch { /* Observer only */ }
+	}
+	return promise;
 };

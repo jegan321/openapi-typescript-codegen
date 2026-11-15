@@ -3,6 +3,9 @@
 import type { ApiRequestOptions } from './ApiRequestOptions';
 import type { ApiResult } from './ApiResult';
 import { ApiError } from './ApiError';
+{{#equals @root.httpClient 'fetch'}}
+import type { CancelablePromise } from './CancelablePromise';
+{{/equals}}
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 type Headers = Record<string, string>;
@@ -19,6 +22,13 @@ export type OpenAPIConfig = {
 	ENCODE_PATH?: ((path: string) => string) | undefined;
 	ERROR_CALLBACK?: (error: ApiError) => void;
 	BEFORE_REQUEST?: (options: ApiRequestOptions) => void{{#equals @root.httpClient 'fetch'}} | Promise<void>{{/equals}};
+{{#equals @root.httpClient 'fetch'}}
+	ON_REQUEST?: (request: CancelablePromise<any>, options: ApiRequestOptions) => void | (() => void);
+	ON_RESPONSE?: (response: Response, options: ApiRequestOptions) => void;
+	ON_TRANSPORT_ERROR?: (error: unknown, options: ApiRequestOptions) => void;
+	TRANSFORM_TRANSPORT_ERROR?: (error: unknown, options: ApiRequestOptions) => unknown;
+	QUERY_SERIALIZER?: (query: Record<string, any>) => string;
+{{/equals}}
 	AFTER_REQUEST?: (apiResult: ApiResult) => void;
 };
 

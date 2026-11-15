@@ -22,5 +22,15 @@ export const sendRequest = async (
 
 	onCancel(() => controller.abort());
 
-	return await fetch(url, request);
+	try {
+		return await fetch(url, request);
+	} catch (error) {
+		if (!onCancel.isCancelled) {
+			config.ON_TRANSPORT_ERROR?.(error, options);
+			if (config.TRANSFORM_TRANSPORT_ERROR) {
+				throw config.TRANSFORM_TRANSPORT_ERROR(error, options);
+			}
+		}
+		throw error;
+	}
 };
