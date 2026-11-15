@@ -7,6 +7,7 @@ Fork of [ferdikoomen/openapi-typescript-codegen](https://github.com/ferdikoomen/
 2. Added an optional config property called `ERROR_CALLBACK` which is a function that will run before API errors are thrown.
 3. Ability to run code before or after each request using `BEFORE_REQUEST` and `BEFORE_REQUEST` config.
 4. Added `--modelsImportPath` to configure service model imports. Combine with `--exportModels false` to share models across clients.
+5. The Fetch client accepts synchronous or asynchronous `BEFORE_REQUEST` hooks (`void | Promise<void>`) and waits for them to complete before preparing and sending the request. If the hook throws or rejects, the request rejects without being sent.
 
 ## Testing
 1. Run `npm test` to run automated tests
