@@ -66,7 +66,7 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
 	return new CancelablePromise(async (resolve, reject, onCancel) => {
 		try {
 			if (config.BEFORE_REQUEST) {
-				config.BEFORE_REQUEST(options);
+				await config.BEFORE_REQUEST(options);
 			}
 			const url = getUrl(config, options);
 			const formData = getFormData(options);

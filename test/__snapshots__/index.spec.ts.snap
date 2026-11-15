@@ -223,7 +223,7 @@ export type OpenAPIConfig = {
     HEADERS?: Headers | Resolver<Headers> | undefined;
     ENCODE_PATH?: ((path: string) => string) | undefined;
     ERROR_CALLBACK?: (error: ApiError) => void;
-    BEFORE_REQUEST?: (options: ApiRequestOptions) => void;
+    BEFORE_REQUEST?: (options: ApiRequestOptions) => void | Promise<void>;
     AFTER_REQUEST?: (apiResult: ApiResult) => void;
 };
 
@@ -541,7 +541,7 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
     return new CancelablePromise(async (resolve, reject, onCancel) => {
         try {
             if (config.BEFORE_REQUEST) {
-                config.BEFORE_REQUEST(options);
+                await config.BEFORE_REQUEST(options);
             }
             const url = getUrl(config, options);
             const formData = getFormData(options);
@@ -3333,7 +3333,7 @@ export type OpenAPIConfig = {
     HEADERS?: Headers | Resolver<Headers> | undefined;
     ENCODE_PATH?: ((path: string) => string) | undefined;
     ERROR_CALLBACK?: (error: ApiError) => void;
-    BEFORE_REQUEST?: (options: ApiRequestOptions) => void;
+    BEFORE_REQUEST?: (options: ApiRequestOptions) => void | Promise<void>;
     AFTER_REQUEST?: (apiResult: ApiResult) => void;
 };
 
@@ -3651,7 +3651,7 @@ export const request = <T>(config: OpenAPIConfig, options: ApiRequestOptions): C
     return new CancelablePromise(async (resolve, reject, onCancel) => {
         try {
             if (config.BEFORE_REQUEST) {
-                config.BEFORE_REQUEST(options);
+                await config.BEFORE_REQUEST(options);
             }
             const url = getUrl(config, options);
             const formData = getFormData(options);
